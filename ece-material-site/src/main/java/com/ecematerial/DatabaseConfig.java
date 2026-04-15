@@ -1,0 +1,42 @@
+package com.ecematerial;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public final class DatabaseConfig {
+    private static final Path DATA_DIR = Path.of("data");
+    private static final Path DATABASE_FILE = DATA_DIR.resolve("ece_material.db");
+    private static final String JDBC_URL = "jdbc:sqlite:" + DATABASE_FILE.toAbsolutePath();
+
+    private DatabaseConfig() {
+    }
+
+    public static void initialize() {
+        try {
+            Files.createDirectories(DATA_DIR);
+
+            try (Connection connection = DriverManager.getConnection(JDBC_URL);
+                 Statement statement = connection.createStatement()) {
+                statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS Users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        google_email TEXT NOT NULL UNIQUE,
+                        ddu_id TEXT NOT NULL UNIQUE,
+                        points INTEGER NOT NULL DEFAULT 0,
+                        rank TEXT NOT NULL DEFAULT 'Student'
+                    )
+                    """);
+            }
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to initialize SQLite database", exception);
+        }
+    }
+
+    public static Connection openConnection() throws SQLException {
+        return DriverManager.getConnection(JDBC_URL);
+    }
+}
