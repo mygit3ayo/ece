@@ -30,6 +30,14 @@ public final class DatabaseConfig {
                         rank TEXT NOT NULL DEFAULT 'Student'
                     )
                     """);
+                statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS Materials (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        title TEXT NOT NULL,
+                        course_code TEXT NOT NULL,
+                        file_path TEXT NOT NULL
+                    )
+                    """);
             }
         } catch (Exception exception) {
             throw new IllegalStateException("Failed to initialize SQLite database", exception);
