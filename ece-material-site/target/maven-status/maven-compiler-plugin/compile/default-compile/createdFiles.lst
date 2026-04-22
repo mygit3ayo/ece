@@ -1,0 +1,16 @@
+com\ecematerial\WorkaroundAdminScript$SeedMaterial.class
+com\ecematerial\EceMaterialServer$HealthHandler.class
+com\ecematerial\SampleMaterialImporter$SeedMaterial.class
+com\ecematerial\Material.class
+com\ecematerial\DatabaseConfig.class
+com\ecematerial\SampleMaterialImporter.class
+com\ecematerial\EceMaterialServer$StaticFileHandler.class
+com\ecematerial\MultipartFormData.class
+com\ecematerial\UserRegistrationValidator.class
+com\ecematerial\WorkaroundAdminScript.class
+com\ecematerial\MaterialRepository.class
+com\ecematerial\MultipartFormData$UploadedFile.class
+com\ecematerial\EceMaterialServer$MaterialsHandler.class
+com\ecematerial\EceMaterialServer.class
+com\ecematerial\EceMaterialServer$DownloadHandler.class
+com\ecematerial\EceMaterialServer$UploadHandler.class

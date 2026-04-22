@@ -1,4 +1,5 @@
 package com.ecematerial;
+import java.nio.file.Files;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -171,8 +172,8 @@ public final class EceMaterialServer {
                 sendJson(exchange, 404, "{\"error\":\"File not found\"}");
                 return;
             }
-
-            exchange.getResponseHeaders().add("Content-Type", contentType(filePath));
+            String mimeType = Files.probeContentType(filePath);
+exchange.getResponseHeaders().add("Content-Type", mimeType != null ? mimeType : "application/octet-stream");
             exchange.getResponseHeaders().add(
                 "Content-Disposition",
                 "attachment; filename=\"" + filePath.getFileName() + "\""
