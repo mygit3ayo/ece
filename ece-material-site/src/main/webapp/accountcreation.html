@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - ECE Bookstore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>ECE Bookstore</h1>
+        <p>Create your account to upload and browse materials</p>
+    </header>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="accountcreation.html">Create Account</a>
+        <a href="login.html">Login</a>
+    </nav>
+
+    <main>
+        <section class="panel-card single-column">
+            <h2 class="section-title">Create Account</h2>
+            <form id="register-form" class="account-form">
+                <label>
+                    <span>Create account with</span>
+                    <select class="form-input" name="identifier_type" id="register-identifier-type" required>
+                        <option value="google_email">Google Email</option>
+                        <option value="ddu_id">DDU ID</option>
+                    </select>
+                </label>
+                <label>
+                    <span id="register-identifier-label">Google Email</span>
+                    <input class="form-input" type="text" name="identifier_value" id="register-identifier-value" placeholder="student@gmail.com" required>
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input class="form-input" type="password" name="password" placeholder="Create a strong password" required>
+                </label>
+                <label>
+                    <span>Confirm Password</span>
+                    <input class="form-input" type="password" name="confirm_password" placeholder="Re-enter your password" required>
+                </label>
+                <button class="buy-btn" type="submit">Create Account</button>
+                <p id="register-status" class="status-text" aria-live="polite"></p>
+            </form>
+            <p class="footer-note">Already registered? <a href="login.html">Go to login</a></p>
+        </section>
+    </main>
+
+    <script>
+        const registerForm = document.getElementById("register-form");
+        const registerStatus = document.getElementById("register-status");
+        const registerIdentifierType = document.getElementById("register-identifier-type");
+        const registerIdentifierLabel = document.getElementById("register-identifier-label");
+        const registerIdentifierValue = document.getElementById("register-identifier-value");
+
+        registerIdentifierType?.addEventListener("change", updateRegisterIdentifierField);
+        updateRegisterIdentifierField();
+
+        registerForm?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            registerStatus.textContent = "Creating account...";
+
+            const formData = new FormData(registerForm);
+            const payload = {
+                identifier_type: formData.get("identifier_type"),
+                identifier_value: formData.get("identifier_value"),
+                password: formData.get("password")
+            };
+
+            if (formData.get("password") !== formData.get("confirm_password")) {
+                registerStatus.textContent = "Password mismatch.";
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await parseJsonResponse(response);
+                if (!response.ok) {
+                    throw new Error(result.error || "Registration failed.");
+                }
+
+                registerStatus.textContent = "Account created successfully. Redirecting to login...";
+                registerForm.reset();
+                setTimeout(() => {
+                    window.location.assign("login.html");
+                }, 900);
+            } catch (error) {
+                registerStatus.textContent = error.message;
+            }
+        });
+
+        async function parseJsonResponse(response) {
+            const contentType = response.headers.get("Content-Type") || "";
+            const bodyText = await response.text();
+            if (!contentType.includes("application/json")) {
+                throw new Error("Server returned an HTML page instead of JSON. Restart the Java server and open this page from localhost.");
+            }
+            return JSON.parse(bodyText);
+        }
+
+        function updateRegisterIdentifierField() {
+            if (registerIdentifierType.value === "ddu_id") {
+                registerIdentifierLabel.textContent = "DDU ID";
+                registerIdentifierValue.placeholder = "DDU1400001";
+            } else {
+                registerIdentifierLabel.textContent = "Google Email";
+                registerIdentifierValue.placeholder = "student@gmail.com";
+            }
+        }
+    </script>
+</body>
+</html>

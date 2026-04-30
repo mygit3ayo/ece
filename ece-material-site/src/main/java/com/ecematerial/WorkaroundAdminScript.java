@@ -17,16 +17,16 @@ public final class WorkaroundAdminScript {
         Files.createDirectories(UPLOADS_DIR);
 
         List<SeedMaterial> materials = List.of(
-            new SeedMaterial("Signals and Systems Essentials", "ECE210", "signals-systems-essentials.pdf"),
-            new SeedMaterial("Digital Logic Workbook", "ECE115", "digital-logic-workbook.pdf"),
-            new SeedMaterial("Circuit Analysis Handbook", "ECE120", "circuit-analysis-handbook.pdf"),
-            new SeedMaterial("Electromagnetics Lecture Notes", "ECE330", "electromagnetics-lecture-notes.pdf"),
-            new SeedMaterial("Microprocessors Quick Revision", "ECE340", "microprocessors-quick-revision.pdf"),
-            new SeedMaterial("Control Systems Fundamentals", "ECE350", "control-systems-fundamentals.pdf"),
-            new SeedMaterial("Power Electronics Primer", "ECE360", "power-electronics-primer.pdf"),
-            new SeedMaterial("Communication Systems Notes", "ECE370", "communication-systems-notes.pdf"),
-            new SeedMaterial("Embedded Systems Lab Guide", "ECE380", "embedded-systems-lab-guide.docx"),
-            new SeedMaterial("Engineering Mathematics Reference", "ECE101", "engineering-mathematics-reference.pdf")
+            new SeedMaterial("Signals and Systems Essentials", "Alan V. Oppenheim", "ECE210", "signals-systems-essentials.pdf"),
+            new SeedMaterial("Digital Logic Workbook", "M. Morris Mano", "ECE115", "digital-logic-workbook.pdf"),
+            new SeedMaterial("Circuit Analysis Handbook", "William H. Hayt", "ECE120", "circuit-analysis-handbook.pdf"),
+            new SeedMaterial("Electromagnetics Lecture Notes", "Matthew N. O. Sadiku", "ECE330", "electromagnetics-lecture-notes.pdf"),
+            new SeedMaterial("Microprocessors Quick Revision", "Barry B. Brey", "ECE340", "microprocessors-quick-revision.pdf"),
+            new SeedMaterial("Control Systems Fundamentals", "Norman S. Nise", "ECE350", "control-systems-fundamentals.pdf"),
+            new SeedMaterial("Power Electronics Primer", "Muhammad H. Rashid", "ECE360", "power-electronics-primer.pdf"),
+            new SeedMaterial("Communication Systems Notes", "Simon Haykin", "ECE370", "communication-systems-notes.pdf"),
+            new SeedMaterial("Embedded Systems Lab Guide", "Frank Vahid", "ECE380", "embedded-systems-lab-guide.docx"),
+            new SeedMaterial("Engineering Mathematics Reference", "Erwin Kreyszig", "ECE101", "engineering-mathematics-reference.pdf")
         );
 
         for (SeedMaterial material : materials) {
@@ -34,7 +34,7 @@ public final class WorkaroundAdminScript {
             if (!Files.exists(filePath)) {
                 Files.writeString(filePath, placeholderContent(material), StandardCharsets.UTF_8);
             }
-            MaterialRepository.insert(material.title(), material.courseCode(), "uploads/" + material.fileName());
+            MaterialRepository.insert(material.title(), material.authorName(), material.courseCode(), "uploads/" + material.fileName());
         }
 
         System.out.println("Workaround import complete. Added " + materials.size() + " sample textbooks.");
@@ -45,12 +45,13 @@ public final class WorkaroundAdminScript {
             ECE-Material sample textbook placeholder
 
             Title: %s
+            Author: %s
             Course Code: %s
 
             Replace this placeholder with the real PDF or DOCX later.
-            """.formatted(material.title(), material.courseCode());
+            """.formatted(material.title(), material.authorName(), material.courseCode());
     }
 
-    private record SeedMaterial(String title, String courseCode, String fileName) {
+    private record SeedMaterial(String title, String authorName, String courseCode, String fileName) {
     }
 }

@@ -1,4 +1,4 @@
 package com.ecematerial;
 
-public record Material(long id, String title, String courseCode, String filePath) {
+public record Material(long id, String title, String authorName, String courseCode, String filePath) {
 }

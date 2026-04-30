@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - ECE Bookstore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>ECE Bookstore</h1>
+        <p>Your account details and quick actions</p>
+    </header>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="myaccount.html">My Account</a>
+        <a href="privacypolicy.html">Privacy Policy</a>
+    </nav>
+
+    <main>
+        <section class="panel-card">
+            <h2 class="section-title">My Account</h2>
+            <div class="profile-shell">
+                <div id="profile-avatar" class="profile-avatar" aria-hidden="true"></div>
+                <div class="profile-details">
+                    <p id="profile-email" class="current-user-text"></p>
+                    <p id="profile-ddu" class="current-user-text"></p>
+                    <p id="profile-rank" class="current-user-text"></p>
+                    <p id="profile-points" class="current-user-text"></p>
+                </div>
+            </div>
+            <div class="button-row">
+                <a class="action-btn" href="index.html">Back to Home</a>
+                <button id="logout-button" class="buy-btn" type="button">Log Out</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const storedUser = sessionStorage.getItem("ece_current_user");
+        const logoutButton = document.getElementById("logout-button");
+        const avatarElement = document.getElementById("profile-avatar");
+
+        if (!storedUser) {
+            window.location.assign("login.html");
+        } else {
+            const user = JSON.parse(storedUser);
+            avatarElement.textContent = chooseAvatar(user);
+            document.getElementById("profile-email").textContent = `Google Email: ${displayEmail(user.google_email)}`;
+            document.getElementById("profile-ddu").textContent = `DDU ID: ${displayDduId(user.ddu_id)}`;
+            document.getElementById("profile-rank").textContent = `Rank: ${user.rank}`;
+            document.getElementById("profile-points").textContent = `Points: ${user.points}`;
+        }
+
+        logoutButton?.addEventListener("click", () => {
+            sessionStorage.removeItem("ece_current_user");
+            window.location.assign("login.html");
+        });
+
+        function chooseAvatar(user) {
+            const avatars = ["📘", "📗", "📙", "📚", "🧠", "⚡", "🛰️", "🔬", "💡", "🧮"];
+            const source = `${user.ddu_id}-${user.google_email}`;
+            let total = 0;
+            for (let index = 0; index < source.length; index += 1) {
+                total += source.charCodeAt(index);
+            }
+            return avatars[total % avatars.length];
+        }
+
+        function displayEmail(value) {
+            return value.endsWith("@placeholder.ecematerial.local") ? "Not provided" : value;
+        }
+
+        function displayDduId(value) {
+            return value.startsWith("UNSET-DDU-") ? "Not provided" : value;
+        }
+    </script>
+</body>
+</html>

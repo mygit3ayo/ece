@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE Student</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>welcome to ECE material portal</h1>
+        <p>Resources for Circuit Theory, DSP, and more</p>
+    </header>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="#upload">Upload</a>
+        <a href="accountcreation.html">Create Account</a>
+        <a href="login.html">Login</a>
+        <a href="myaccount.html">My Account</a>
+    </nav>
+
+    <main>
+        <section class="panel-card">
+            <h2 class="section-title">Search Books and Notes</h2>
+            <input id="search-input" class="search-bar" type="search" placeholder="Search by title, author, or course code">
+        </section>
+
+        <h2 class="section-title">Custom Recommendations</h2>
+        <section id="recommended-list" class="book-grid">
+            <p class="empty-state">Recommendations will appear here.</p>
+        </section>
+
+        <section id="library" class="panel-card">
+            <div class="collapsible-head">
+                <h2>Available Materials</h2>
+                <button id="toggle-library" type="button">Collapse</button>
+            </div>
+            <div id="library-content">
+                <div id="materials-list" class="book-grid">
+                    <p class="empty-state">Loading materials...</p>
+                </div>
+                <div class="library-actions">
+                    <button id="show-more-materials" type="button" hidden>Show More</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="upload" class="panel-card">
+            <h2 class="section-title">Upload Material</h2>
+            <form id="upload-form" class="upload-form">
+                <label>
+                    <span>Title</span>
+                    <input class="form-input" type="text" name="title" placeholder="Signals and Systems Notes" required>
+                </label>
+                <label>
+                    <span>Author Name</span>
+                    <input class="form-input" type="text" name="author_name" placeholder="Alan V. Oppenheim" required>
+                </label>
+                <label>
+                    <span>Course Code</span>
+                    <input class="form-input" type="text" name="course_code" placeholder="ECE210" required>
+                </label>
+                <input id="file-input" class="file-input" type="file" name="file" accept=".pdf,.docx" required>
+                <div id="drop-zone" class="drop-zone" role="button" tabindex="0">
+                    <div>
+                        <strong>Drop your file here</strong>
+                        <p id="selected-file-text" class="selected-file-text">Drop a PDF or DOCX file here, or click to choose one.</p>
+                    </div>
+                </div>
+                <button class="buy-btn" type="submit">Upload File</button>
+                <div id="upload-progress" class="upload-progress" hidden>
+                    <div class="upload-progress-bar">
+                        <div id="upload-progress-fill" class="upload-progress-fill"></div>
+                    </div>
+                    <p id="upload-progress-text" class="upload-progress-text">0%</p>
+                </div>
+                <p id="upload-status" class="status-text" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section class="panel-card">
+            <h2 class="section-title">Copyright Notice</h2>
+            <p>Books and lecture notes belong to their original authors, lecturers, or publishers. Uploading a file does not transfer ownership to the uploader.</p>
+            <div class="button-row">
+                <a class="action-btn" href="privacypolicy.html">Read Privacy Policy</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

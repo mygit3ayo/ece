@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 
 public final class EceMaterialServer {
     private static final int PORT = 8080;
-    private static final Path WEB_ROOT = Path.of(".").toAbsolutePath().normalize();
+    private static final Path WEB_ROOT = resolveWebRoot();
     private static final Path UPLOADS_DIR = WEB_ROOT.resolve("uploads");
 
     private EceMaterialServer() {
@@ -28,9 +28,12 @@ public final class EceMaterialServer {
     public static void main(String[] args) throws IOException {
         DatabaseConfig.initialize();
         Files.createDirectories(UPLOADS_DIR);
+        DefaultLibrarySeeder.seedIfEmpty(UPLOADS_DIR);
 
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/api/health", new HealthHandler());
+        server.createContext("/api/register", new RegisterHandler());
+        server.createContext("/api/login", new LoginHandler());
         server.createContext("/api/materials", new MaterialsHandler());
         server.createContext("/api/materials/upload", new UploadHandler());
         server.createContext("/downloads", new DownloadHandler());
@@ -41,6 +44,14 @@ public final class EceMaterialServer {
         System.out.println("ECE-Material running at http://localhost:" + PORT);
     }
 
+    private static Path resolveWebRoot() {
+        Path webappRoot = Path.of("src", "main", "webapp").toAbsolutePath().normalize();
+        if (Files.exists(webappRoot) && Files.isDirectory(webappRoot)) {
+            return webappRoot;
+        }
+        return Path.of(".").toAbsolutePath().normalize();
+    }
+
     private static final class HealthHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -49,6 +60,123 @@ public final class EceMaterialServer {
             exchange.sendResponseHeaders(200, body.length);
             try (OutputStream outputStream = exchange.getResponseBody()) {
                 outputStream.write(body);
+            }
+        }
+    }
+
+    private static final class RegisterHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.toLowerCase(Locale.ROOT).contains("application/json")) {
+                sendJson(exchange, 400, "{\"error\":\"Expected application/json\"}");
+                return;
+            }
+
+            try (InputStream inputStream = exchange.getRequestBody()) {
+                String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                String identifierType = optionalJsonField(body, "identifier_type");
+                String identifierValue = optionalJsonField(body, "identifier_value");
+                String password = requiredJsonField(body, "password");
+
+                if (identifierType == null || identifierValue == null) {
+                    String googleEmail = optionalJsonField(body, "google_email");
+                    String dduId = optionalJsonField(body, "ddu_id");
+
+                    if (googleEmail != null && !googleEmail.isBlank()) {
+                        identifierType = "google_email";
+                        identifierValue = googleEmail;
+                    } else if (dduId != null && !dduId.isBlank()) {
+                        identifierType = "ddu_id";
+                        identifierValue = dduId;
+                    }
+                }
+
+                if (identifierType == null || identifierType.isBlank()) {
+                    throw new IllegalArgumentException("identifier_type is required.");
+                }
+                if (identifierValue == null || identifierValue.isBlank()) {
+                    throw new IllegalArgumentException("identifier_value is required.");
+                }
+
+                User user = UserService.register(identifierType, identifierValue, password);
+                sendJson(
+                    exchange,
+                    201,
+                    """
+                    {"message":"Registration successful","user":{"id":%d,"google_email":"%s","ddu_id":"%s","points":%d,"rank":"%s"}}
+                    """.formatted(
+                        user.id(),
+                        escapeJson(user.googleEmail()),
+                        escapeJson(user.dduId()),
+                        user.points(),
+                        escapeJson(user.rank())
+                    )
+                );
+            } catch (IllegalArgumentException | IllegalStateException exception) {
+                sendJson(exchange, 400, "{\"error\":\"" + escapeJson(exception.getMessage()) + "\"}");
+            } catch (Exception exception) {
+                sendJson(exchange, 500, "{\"error\":\"Registration failed\"}");
+            }
+        }
+    }
+
+    private static final class LoginHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.toLowerCase(Locale.ROOT).contains("application/json")) {
+                sendJson(exchange, 400, "{\"error\":\"Expected application/json\"}");
+                return;
+            }
+
+            try (InputStream inputStream = exchange.getRequestBody()) {
+                String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                String identifierValue = optionalJsonField(body, "identifier_value");
+                String password = requiredJsonField(body, "password");
+
+                if (identifierValue == null || identifierValue.isBlank()) {
+                    String googleEmail = optionalJsonField(body, "google_email");
+                    String dduId = optionalJsonField(body, "ddu_id");
+                    if (googleEmail != null && !googleEmail.isBlank()) {
+                        identifierValue = googleEmail;
+                    } else if (dduId != null && !dduId.isBlank()) {
+                        identifierValue = dduId;
+                    }
+                }
+
+                if (identifierValue == null || identifierValue.isBlank()) {
+                    throw new IllegalArgumentException("identifier_value is required.");
+                }
+
+                User user = UserService.attachExistingUser(identifierValue, password);
+                sendJson(
+                    exchange,
+                    200,
+                    """
+                    {"message":"Login successful","user":{"id":%d,"google_email":"%s","ddu_id":"%s","points":%d,"rank":"%s"}}
+                    """.formatted(
+                        user.id(),
+                        escapeJson(user.googleEmail()),
+                        escapeJson(user.dduId()),
+                        user.points(),
+                        escapeJson(user.rank())
+                    )
+                );
+            } catch (IllegalArgumentException | IllegalStateException exception) {
+                sendJson(exchange, 400, "{\"error\":\"" + escapeJson(exception.getMessage()) + "\"}");
+            } catch (Exception exception) {
+                sendJson(exchange, 500, "{\"error\":\"Login failed\"}");
             }
         }
     }
@@ -70,10 +198,11 @@ public final class EceMaterialServer {
                 }
                 String fileName = Path.of(material.filePath()).getFileName().toString();
                 json.append("""
-                    {"id":%d,"title":"%s","course_code":"%s","file_path":"%s","download_url":"/downloads/%s"}
+                    {"id":%d,"title":"%s","author_name":"%s","course_code":"%s","file_path":"%s","download_url":"/downloads/%s"}
                     """.formatted(
                     material.id(),
                     escapeJson(material.title()),
+                    escapeJson(material.authorName()),
                     escapeJson(material.courseCode()),
                     escapeJson(material.filePath()),
                     escapeJson(fileName)
@@ -101,6 +230,7 @@ public final class EceMaterialServer {
             try (InputStream inputStream = exchange.getRequestBody()) {
                 MultipartFormData formData = MultipartFormData.parse(contentType, inputStream.readAllBytes());
                 String title = requiredField(formData.getField("title"), "title");
+                String authorName = requiredField(formData.getField("author_name"), "author_name");
                 String courseCode = requiredField(formData.getField("course_code"), "course_code");
                 MultipartFormData.UploadedFile file = formData.getFile();
                 if (file == null) {
@@ -117,15 +247,16 @@ public final class EceMaterialServer {
 
                 Files.write(storedPath, file.getContent());
                 String filePath = "uploads/" + storedName;
-                MaterialRepository.insert(title, courseCode, filePath);
+                MaterialRepository.insert(title, authorName, courseCode, filePath);
 
                 sendJson(
                     exchange,
                     201,
                     """
-                    {"message":"Upload successful","title":"%s","course_code":"%s","file_path":"%s","download_url":"/downloads/%s"}
+                    {"message":"Upload successful","title":"%s","author_name":"%s","course_code":"%s","file_path":"%s","download_url":"/downloads/%s"}
                     """.formatted(
                         escapeJson(title),
+                        escapeJson(authorName),
                         escapeJson(courseCode),
                         escapeJson(filePath),
                         escapeJson(storedName)
@@ -188,7 +319,17 @@ exchange.getResponseHeaders().add("Content-Type", mimeType != null ? mimeType : 
     private static final class StaticFileHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJson(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
             String requestPath = exchange.getRequestURI().getPath();
+            if (requestPath.startsWith("/api/")) {
+                sendJson(exchange, 404, "{\"error\":\"API route not found\"}");
+                return;
+            }
+
             Path target = resolveTarget(requestPath);
 
             if (!Files.exists(target) || Files.isDirectory(target)) {
@@ -253,6 +394,44 @@ exchange.getResponseHeaders().add("Content-Type", mimeType != null ? mimeType : 
 
     private static String sanitizeFileName(String fileName) {
         return Path.of(fileName).getFileName().toString().replaceAll("[^a-zA-Z0-9._-]", "_");
+    }
+
+    private static String requiredJsonField(String json, String fieldName) {
+        String value = optionalJsonField(json, fieldName);
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " is required.");
+        }
+        return value.trim();
+    }
+
+    private static String optionalJsonField(String json, String fieldName) {
+        String value = extractJsonField(json, fieldName);
+        return value == null ? null : value.trim();
+    }
+
+    private static String extractJsonField(String json, String fieldName) {
+        String pattern = "\"" + fieldName + "\"";
+        int keyIndex = json.indexOf(pattern);
+        if (keyIndex < 0) {
+            return null;
+        }
+
+        int colonIndex = json.indexOf(':', keyIndex + pattern.length());
+        if (colonIndex < 0) {
+            return null;
+        }
+
+        int valueStart = json.indexOf('"', colonIndex + 1);
+        if (valueStart < 0) {
+            return null;
+        }
+
+        int valueEnd = json.indexOf('"', valueStart + 1);
+        if (valueEnd < 0) {
+            return null;
+        }
+
+        return json.substring(valueStart + 1, valueEnd);
     }
 
     private static String escapeJson(String value) {

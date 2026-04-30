@@ -1,8 +1,14 @@
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\DatabaseConfig.java
+F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\DefaultLibrarySeeder.java
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\EceMaterialServer.java
+F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\HashingUtil.java
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\Material.java
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\MaterialRepository.java
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\MultipartFormData.java
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\SampleMaterialImporter.java
+F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\User.java
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\UserRegistrationValidator.java
+F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\UserRepository.java
+F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\UserService.java
+F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\UserSession.java
 F:\projects\ece-material-site\ece-material-site\src\main\java\com\ecematerial\WorkaroundAdminScript.java

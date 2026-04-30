@@ -5,20 +5,25 @@ import java.util.regex.Pattern;
 
 public final class UserRegistrationValidator {
     private static final Pattern DDU_ID_PATTERN = Pattern.compile("^DDU(\\d{7})$");
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$");
     private static final int MIN_DDU_NUMBER = 1400001;
     private static final int MAX_DDU_NUMBER = 1900090;
 
     private UserRegistrationValidator() {
     }
 
-    public static void validateRegistration(String googleEmail, String dduId) {
+    public static void validateRegistration(String googleEmail, String dduId, String password) {
         validateGoogleEmail(googleEmail);
         validateDduId(dduId);
+        validatePassword(password);
     }
 
     public static void validateGoogleEmail(String googleEmail) {
         if (googleEmail == null || googleEmail.isBlank()) {
             throw new IllegalArgumentException("Google email is required.");
+        }
+        if (!googleEmail.contains("@")) {
+            throw new IllegalArgumentException("Google email is not valid.");
         }
     }
 
@@ -46,6 +51,18 @@ public final class UserRegistrationValidator {
             return true;
         } catch (IllegalArgumentException exception) {
             return false;
+        }
+    }
+
+    public static void validatePassword(String password) {
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Password is required.");
+        }
+
+        if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            throw new IllegalArgumentException(
+                "Password must be at least 8 characters and include uppercase, lowercase, and a number."
+            );
         }
     }
 }

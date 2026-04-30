@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE Bookstore Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>ECE Bookstore</h1>
+        <p>Login with your DDU ID and password</p>
+    </header>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="accountcreation.html">Create Account</a>
+        <a href="login.html">Login</a>
+    </nav>
+
+    <main>
+        <section class="panel-card single-column">
+            <h2 class="section-title">Log In</h2>
+            <form id="login-form" class="account-form">
+                <label>
+                    <span>Sign in using</span>
+                    <select class="form-input" name="identifier_type" id="login-identifier-type" required>
+                        <option value="google_email">Google Email</option>
+                        <option value="ddu_id">DDU ID</option>
+                    </select>
+                </label>
+                <label>
+                    <span id="login-identifier-label">Google Email</span>
+                    <input class="form-input" type="text" name="identifier_value" id="login-identifier-value" placeholder="student@gmail.com" required>
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input class="form-input" type="password" name="password" placeholder="Enter your password" required>
+                </label>
+                <button class="buy-btn" type="submit">Log In</button>
+                <p id="login-status" class="status-text" aria-live="polite"></p>
+            </form>
+            <p class="footer-note">Need an account? <a href="accountcreation.html">Create account</a></p>
+        </section>
+    </main>
+
+    <script>
+        const loginForm = document.getElementById("login-form");
+        const loginStatus = document.getElementById("login-status");
+        const loginIdentifierType = document.getElementById("login-identifier-type");
+        const loginIdentifierLabel = document.getElementById("login-identifier-label");
+        const loginIdentifierValue = document.getElementById("login-identifier-value");
+
+        loginIdentifierType?.addEventListener("change", updateLoginIdentifierField);
+        updateLoginIdentifierField();
+
+        loginForm?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            loginStatus.textContent = "Logging in...";
+
+            const formData = new FormData(loginForm);
+            const payload = {
+                identifier_value: formData.get("identifier_value"),
+                password: formData.get("password")
+            };
+
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await parseJsonResponse(response);
+                if (!response.ok) {
+                    throw new Error(result.error || "Login failed.");
+                }
+
+                sessionStorage.setItem("ece_current_user", JSON.stringify(result.user));
+                loginStatus.textContent = "Login successful. Redirecting...";
+                loginForm.reset();
+                window.location.assign("myaccount.html");
+            } catch (error) {
+                loginStatus.textContent = error.message;
+            }
+        });
+
+        async function parseJsonResponse(response) {
+            const contentType = response.headers.get("Content-Type") || "";
+            const bodyText = await response.text();
+            if (!contentType.includes("application/json")) {
+                throw new Error("Server returned an HTML page instead of JSON. Restart the Java server and open /login.html from localhost.");
+            }
+            return JSON.parse(bodyText);
+        }
+
+        function updateLoginIdentifierField() {
+            if (loginIdentifierType.value === "ddu_id") {
+                loginIdentifierLabel.textContent = "DDU ID";
+                loginIdentifierValue.placeholder = "DDU1400001";
+            } else {
+                loginIdentifierLabel.textContent = "Google Email";
+                loginIdentifierValue.placeholder = "student@gmail.com";
+            }
+        }
+    </script>
+</body>
+</html>

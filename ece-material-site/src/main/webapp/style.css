@@ -1,0 +1,243 @@
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    color: #333;
+    text-align: center;
+}
+
+header {
+    background-color: #003366;
+    color: white;
+    padding: 30px 20px;
+}
+
+header h1 {
+    margin: 0 0 8px;
+}
+
+header p {
+    margin: 0;
+}
+
+nav {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+nav a,
+nav button,
+.action-btn,
+.buy-btn {
+    margin: 0;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 20px;
+    border: 1px solid #003366;
+    background: white;
+    color: #003366;
+    text-decoration: none;
+    font: inherit;
+}
+
+nav a:hover,
+nav button:hover,
+.action-btn:hover,
+.buy-btn:hover {
+    background: #003366;
+    color: white;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    padding: 20px;
+}
+
+#book-grid,
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 0;
+}
+
+.book-card,
+.panel-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+    text-align: left;
+}
+
+.book-card:hover,
+.panel-card:hover {
+    transform: translateY(-6px);
+}
+
+.book-cover,
+.profile-avatar {
+    font-size: 60px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.buy-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+.buy-btn:hover {
+    background-color: #218838;
+    color: white;
+}
+
+.search-bar,
+.form-input,
+.search-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccd3db;
+    background: white;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.section-title {
+    margin: 30px 0 14px;
+    color: #003366;
+    text-align: left;
+}
+
+.form-stack,
+.account-form,
+.upload-form {
+    display: grid;
+    gap: 14px;
+}
+
+.form-stack label,
+.account-form label,
+.upload-form label {
+    display: grid;
+    gap: 6px;
+    text-align: left;
+}
+
+.status-text,
+.empty-state,
+.material-meta,
+.selected-file-text,
+.upload-progress-text,
+.footer-note,
+.current-user-text {
+    color: #666;
+}
+
+.drop-zone {
+    min-height: 150px;
+    border: 2px dashed #7d93aa;
+    border-radius: 10px;
+    background: #f8fbff;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.drop-zone.drag-active {
+    border-color: #003366;
+    background: #eef5ff;
+}
+
+.file-input {
+    display: none;
+}
+
+.upload-progress {
+    display: grid;
+    gap: 8px;
+}
+
+.upload-progress-bar {
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #d9e2ec;
+}
+
+.upload-progress-fill {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #003366, #28a745);
+}
+
+.library-actions {
+    margin-top: 18px;
+    text-align: center;
+}
+
+.profile-shell {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #eef5ff;
+    display: grid;
+    place-items: center;
+    margin: 0 auto;
+}
+
+.profile-details {
+    display: grid;
+    gap: 8px;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.collapsible-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.collapsible-head h2,
+.collapsible-head h3,
+.panel-card h2,
+.panel-card h3 {
+    margin: 0;
+}
+
+.single-column {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+@media (max-width: 700px) {
+    .profile-shell {
+        grid-template-columns: 1fr;
+    }
+}
